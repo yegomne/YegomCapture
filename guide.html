@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설치 가이드 STEP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 웹폰트 적용 (Pretendard) */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #0a0a0a; /* 매우 어두운 딥 다크 배경 */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <!-- 카드들을 담는 반응형 그리드 래퍼 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
+        
+        <!-- STEP 01 -->
+        <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-900/10 transition-all duration-300">
+            <!-- 아이콘 박스 -->
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#211a2e] text-[#a78bfa]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <!-- 텍스트 영역 -->
+            <p class="text-[#a78bfa] text-xs font-bold tracking-[0.2em] mb-3">STEP 01</p>
+            <h3 class="text-white text-xl font-bold mb-4">설치 파일 실행</h3>
+            <p class="text-[#8c8c8c] text-[15px] leading-relaxed">
+                다운로드 폴더에서 <span class="text-gray-300">setup.exe</span>를 실행하세요. 최신 버전의 안정적인 설치 환경을 제공합니다.
+            </p>
+        </div>
+
+        <!-- STEP 02 -->
+        <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
+            <!-- 아이콘 박스 -->
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#182335] text-[#60a5fa]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <!-- 텍스트 영역 -->
+            <p class="text-[#60a5fa] text-xs font-bold tracking-[0.2em] mb-3">STEP 02</p>
+            <h3 class="text-white text-xl font-bold mb-4">'추가 정보' 클릭</h3>
+            <p class="text-[#8c8c8c] text-[15px] leading-relaxed">
+                Windows 보호 알림 시 안내글 속의 <span class="border-b border-[#555] text-gray-300 pb-[1px]">'추가 정보'</span> 문구를 클릭합니다.
+            </p>
+        </div>
+
+        <!-- STEP 03 -->
+        <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pink-900/10 transition-all duration-300">
+            <!-- 아이콘 박스 -->
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#2a1d2c] text-[#d8b4fe]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-2.5-13.5v7a.5.5 0 00.77.416l5.5-3.5a.5.5 0 000-.832l-5.5-3.5a.5.5 0 00-.77.416z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <!-- 텍스트 영역 -->
+            <p class="text-[#d8b4fe] text-xs font-bold tracking-[0.2em] mb-3">STEP 03</p>
+            <h3 class="text-white text-xl font-bold mb-4">'실행' 버튼 클릭</h3>
+            <p class="text-[#8c8c8c] text-[15px] leading-relaxed">
+                우측 하단에 나타나는 '실행' 버튼을 클릭하여 설치를 완료합니다. 즉시 프로그램을 시작할 수 있습니다.
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>
