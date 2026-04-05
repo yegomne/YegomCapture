@@ -145,6 +145,41 @@
                 </p>
             </div>
         </div>
+
+        <!-- V3 백신 안내 -->
+        <div class="mt-12 bg-[#121212] border border-amber-500/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start relative overflow-hidden group">
+            <!-- Alert glow -->
+            <div class="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent pointer-events-none"></div>
+            
+            <div class="w-12 h-12 shrink-0 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            
+            <div class="relative z-10 flex-1">
+                <h3 class="text-amber-400 font-bold text-lg mb-2">V3 백신 등에서 알림 메시지가 뜰 때</h3>
+                <p class="text-gray-300 text-[15px] leading-relaxed mb-6">
+                    예곰 캡처(YegomCapture)는 100% 안전하게 <span class="text-white font-semibold">자체 개발된 소프트웨어</span>입니다. 다만, 갓 배포된 최신 프로그램 특성상 V3 같은 백신 프로그램이 '처음 보는 파일'로 인식하여 일시적으로 보안 검사 창을 띄울 수 있습니다. <span class="text-amber-300">바이러스가 아니니 절대 안심하시고</span>, 아래의 간단한 2단계만 진행해 주시면 정상적으로 사용하실 수 있습니다!
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="bg-[#181818] rounded-xl p-5 flex-1 border border-[#2a2a2a] hover:border-amber-500/20 transition-colors">
+                        <p class="text-white font-bold text-[15px] mb-2 flex items-center gap-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-1 rounded-md">1단계</span>
+                            [검사 중지] 누르기
+                        </p>
+                        <p class="text-[#8c8c8c] text-sm leading-relaxed">'앱 격리 검사 중'이라는 주황색 알림 창이 뜨면 당황하지 마시고, 화면 왼쪽 아래에 있는 <span class="text-gray-300 font-medium">[검사 중지]</span> 버튼을 클릭해 주세요.</p>
+                    </div>
+                    <div class="bg-[#181818] rounded-xl p-5 flex-1 border border-[#2a2a2a] hover:border-amber-500/20 transition-colors">
+                        <p class="text-white font-bold text-[15px] mb-2 flex items-center gap-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-1 rounded-md">2단계</span>
+                            [파일 해시 예외 처리] 누르기
+                        </p>
+                        <p class="text-[#8c8c8c] text-sm leading-relaxed">이어서 '앱 격리 검사 중지' 화면으로 바뀌면, 왼쪽 아래의 <span class="text-gray-300 font-medium">[파일 해시 예외 처리]</span> 버튼을 클릭해 주세요.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Footer -->
