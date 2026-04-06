@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox,
                              QPushButton, QLineEdit, QCheckBox)
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QImage, QPainter, QPen, QColor, QScreen, QGuiApplication
 from datetime import datetime
-from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRect, QPoint, QObject
+from PyQt6.QtCore import QThread, pyqtSignal, Qt, QRect, QPoint, QObject, QTimer
 
 def resource_path(relative_path):
     try:
@@ -253,25 +253,45 @@ class OverlayWidget(QWidget):
 class ScrollCaptureWorker(QThread):
     finished = pyqtSignal(object)
     
-    def __init__(self, start_img, rect):
+    def __init__(self, start_img, rect, offset_x=0, offset_y=0):
         super().__init__()
         self.start_img = start_img
         self.rect = rect
+        self.offset_x = offset_x
+        self.offset_y = offset_y
         self.running = True
         
     def run(self):
+        import ctypes
+        class POINT(ctypes.Structure):
+            _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
         self.last_chunk = self.start_img.copy()
         stitched_img = self.start_img.copy()
         
         h = self.rect.height()
-        arrows = max(2, min(20, int(h * 0.5 / 40)))
+        # 스크롤 양을 안정적으로 줄입니다.
+        arrows = max(1, int(h * 0.3 / 100))
+
+        time.sleep(0.5) 
+        
+        cx = self.rect.x() + self.rect.width() // 2 + self.offset_x
+        cy = self.rect.y() + self.rect.height() // 2 + self.offset_y
+        ctypes.windll.user32.SetCursorPos(int(cx), int(cy))
         
         for i in range(250):
             if not self.running: break
-            for _ in range(arrows):
-                keyboard.send('down')
-                time.sleep(0.005)
-            time.sleep(0.3) 
+            
+            # 마우스를 움직였으면 강제 종료 (무한 루프 방지)
+            pt = POINT()
+            ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+            if abs(pt.x - int(cx)) > 20 or abs(pt.y - int(cy)) > 20:
+                print("마우스 이동 감지됨. 스크롤 캡쳐를 강제 종료합니다.")
+                break
+            
+            ctypes.windll.user32.mouse_event(0x0800, 0, 0, -120 * arrows, 0)
+            
+            time.sleep(0.4) 
             with mss.mss() as sct:
                 monitor = sct.monitors[0]
                 sct_img = sct.grab(monitor)
@@ -287,38 +307,35 @@ class ScrollCaptureWorker(QThread):
             H = gray1.shape[0]
             th = int(H * 0.2)
             if th > 10:
-                templ_y_start = int(H * 0.6)
-                template = gray1[templ_y_start : templ_y_start + th, :]
-                res = cv2.matchTemplate(gray2, template, cv2.TM_CCOEFF_NORMED)
-                _, max_val, _, max_loc = cv2.minMaxLoc(res)
+                templ_y_starts = [int(H * 0.6), int(H * 0.4), int(H * 0.2), int(H * 0.7)]
+                best_match_found = False
                 
-                if max_val > 0.75:
-                    match_y = max_loc[1]
-                    shift = templ_y_start - match_y
-                    if shift > 0:
-                        unique_part = new_chunk[H - shift : H, :]
-                        stitched_img = np.vstack((stitched_img, unique_part))
-                        self.last_chunk = new_chunk
-                    else: break
-                else:
-                    th2 = int(H * 0.1)
-                    if th2 > 10:
-                        templ_y_start2 = int(H * 0.7)
-                        template2 = gray1[templ_y_start2 : templ_y_start2 + th2, :]
-                        res2 = cv2.matchTemplate(gray2, template2, cv2.TM_CCOEFF_NORMED)
-                        _, max_val2, _, max_loc2 = cv2.minMaxLoc(res2)
-                        if max_val2 > 0.75:
-                            match_y2 = max_loc2[1]
-                            shift2 = templ_y_start2 - match_y2
-                            if shift2 > 0:
-                                unique_part = new_chunk[H - shift2 : H, :]
-                                stitched_img = np.vstack((stitched_img, unique_part))
-                                self.last_chunk = new_chunk
-                                continue
-                            else: break
+                for start_y in templ_y_starts:
+                    template = gray1[start_y : start_y + th, :]
+                    if np.std(template) < 3.0:
+                        continue # 너무 단조로운 영역(단색 배경)은 오작동 원인이므로 건너뜀
+                        
+                    res = cv2.matchTemplate(gray2, template, cv2.TM_CCOEFF_NORMED)
+                    _, max_val, _, max_loc = cv2.minMaxLoc(res)
+                    
+                    if max_val > 0.75:
+                        match_y = max_loc[1]
+                        shift = start_y - match_y
+                        if shift > 0:
+                            unique_part = new_chunk[H - shift : H, :]
+                            stitched_img = np.vstack((stitched_img, unique_part))
+                            self.last_chunk = new_chunk
+                            best_match_found = True
+                            break # Append success
+                        elif shift <= 0:
+                            # Didn't scroll down
+                            pass
+                
+                if not best_match_found:
                     break
-            else: break
+        
         self.finished.emit(stitched_img)
+
 
 class SettingsDialog(QDialog):
     def __init__(self, current_theme, current_naming, current_format, current_dir, current_autosave, current_hk_normal, current_hk_scroll, current_hk_folder, parent=None):
@@ -480,8 +497,13 @@ class CaptureApp(QObject):
         self.preview = None
         self.scroll_worker = None
         
+        self.pending_scroll = False
+        self.capture_timer = QTimer()
+        self.capture_timer.setSingleShot(True)
+        self.capture_timer.timeout.connect(self._execute_capture)
+        
         self.hotkey_thread = HotkeyThread(self.hotkey_normal, self.hotkey_scroll, self.hotkey_folder)
-        self.hotkey_thread.trigger_capture.connect(self._start_capture)
+        self.hotkey_thread.trigger_capture.connect(self._debounce_capture)
         self.hotkey_thread.cancel_capture.connect(self._cancel_capture)
         self.hotkey_thread.open_folder.connect(self._open_save_folder)
         self.hotkey_thread.start()
@@ -709,7 +731,23 @@ class CaptureApp(QObject):
                 QScrollBar::handle:vertical:hover { background: #EC4899; }
             """)
 
+    def _debounce_capture(self, is_scroll):
+        if is_scroll:
+            self.pending_scroll = True
+        
+        # Debounce timer: wait 100ms before evaluating the action.
+        # This resolves the conflict when standard and explicit hotkeys fire concurrently.
+        self.capture_timer.start(100)
+
+    def _execute_capture(self):
+        is_scroll = self.pending_scroll
+        self.pending_scroll = False
+        self._start_capture(is_scroll)
+
     def _start_capture(self, is_scroll):
+        if hasattr(self, 'overlay') and self.overlay and self.overlay.isVisible():
+            return
+
         with mss.mss() as sct:
             monitor = sct.monitors[0]
             sct_img = sct.grab(monitor)
@@ -726,8 +764,11 @@ class CaptureApp(QObject):
         if not is_scroll:
             self.show_preview(cropped_img_cv)
         else:
-            self.tray_icon.showMessage("스크롤 캡쳐 진행 중", "키보드 조작을 멈춰주세요...", QSystemTrayIcon.MessageIcon.Information, 2000)
-            self.scroll_worker = ScrollCaptureWorker(cropped_img_cv, rect)
+            # 트레이 메시지로 인한 포커스 상실 및 캡쳐 화면 왜곡 방지를 위해 주석 처리
+            # self.tray_icon.showMessage("스크롤 캡쳐 진행 중", "키보드 조작을 멈춰주세요...", QSystemTrayIcon.MessageIcon.Information, 2000)
+            offset_x = self.overlay.geometry().x()
+            offset_y = self.overlay.geometry().y()
+            self.scroll_worker = ScrollCaptureWorker(cropped_img_cv, rect, offset_x, offset_y)
             self.scroll_worker.finished.connect(self.show_preview)
             self.scroll_worker.start()
 
