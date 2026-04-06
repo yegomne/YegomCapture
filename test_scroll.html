@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스크롤 캡쳐 테스트 페이지</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-weight: bold;
+        }
+        .container {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .block {
+            width: 80%;
+            max-width: 800px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .block:nth-child(odd) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .block:nth-child(even) { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
+        
+        .ruler {
+            position: absolute;
+            left: 20px;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        YegomneCapture 스크롤 캡쳐 검증용 테스트 페이지
+    </div>
+
+    <div class="container" id="blocks"></div>
+
+    <script>
+        const container = document.getElementById('blocks');
+        // 50개의 블록을 생성 (총 길이 약 12,000px 이상)
+        for (let i = 1; i <= 50; i++) {
+            const div = document.createElement('div');
+            div.className = 'block';
+            div.innerHTML = `
+                <span class="ruler">Block #${i}</span>
+                <span>스크롤 캡쳐 구간 ${i}</span>
+            `;
+            container.appendChild(div);
+        }
+    </script>
+
+</body>
+</html>

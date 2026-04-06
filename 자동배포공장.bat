@@ -1,26 +1,26 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 echo ===========================================
-echo 🚀 이과장의 가상환경 기반 배포 공장 🚀
+echo ?? ?닿낵?μ쓽 媛?곹솚寃?湲곕컲 諛고룷 怨듭옣 ??
 echo ===========================================
 
 echo.
-echo [1/3] 가상 환경(venv) 확인 및 필수 패키지 다이어트 설치
+echo [1/3] 媛???섍꼍(venv) ?뺤씤 諛??꾩닔 ?⑦궎吏 ?ㅼ씠?댄듃 ?ㅼ튂
 if not exist "venv\Scripts\activate.bat" (
-    echo 가상 환경이 없습니다. 새로 생성합니다...
+    echo 媛???섍꼍???놁뒿?덈떎. ?덈줈 ?앹꽦?⑸땲??..
     python -m venv venv
 )
 call venv\Scripts\activate.bat
-echo 필수 패키지 설치 중... (잠시만 대기해주세요!)
+echo ?꾩닔 ?⑦궎吏 ?ㅼ튂 以?.. (?좎떆留??湲고빐二쇱꽭??)
 python -m pip install --upgrade pip >nul
 pip install PyQt6 opencv-python-headless mss keyboard numpy pyinstaller >nul
 
 echo.
-echo [2/3] 파이썬 스크립트를 가벼운 main.exe로 변환 중...
+echo [2/3] ?뚯씠???ㅽ겕由쏀듃瑜?媛踰쇱슫 main.exe濡?蹂??以?..
 python -m PyInstaller -w -F --icon=icon.ico --add-data "icon.ico;." --add-data "icon.png;." main.py
 
 echo.
-echo [3/3] Setup_Script.iss 컴파일 (설치 파일 생성)
+echo [3/3] Setup_Script.iss 而댄뙆??(?ㅼ튂 ?뚯씪 ?앹꽦)
 set "ISCC_PATH=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 if exist "%LocalAppData%\Programs\Inno Setup 6\ISCC.exe" set "ISCC_PATH=%LocalAppData%\Programs\Inno Setup 6\ISCC.exe"
 if exist "%ProgramFiles%\Inno Setup 6\ISCC.exe" set "ISCC_PATH=%ProgramFiles%\Inno Setup 6\ISCC.exe"
@@ -29,27 +29,28 @@ if exist "%ProgramFiles%\Inno Setup 6\ISCC.exe" set "ISCC_PATH=%ProgramFiles%\In
 
 echo.
 echo ===========================================
-echo [SUCCESS] 가벼운 배포 파일 만들기 완료! 💸
+echo [SUCCESS] 媛踰쇱슫 諛고룷 ?뚯씪 留뚮뱾湲??꾨즺! ?뮯
 echo ===========================================
-echo 배포된 파일: Inno_Output\YegomCapture_Setup_v1.0.1.exe
+echo 諛고룷???뚯씪: Inno_Output\YegomCapture_Setup_v1.0.2.exe
 echo.
-echo [4/3] GitHub Releases (레퍼런스) 자동 업로드 시작! 🚀탑승준비!
+echo [4/3] GitHub Releases (?덊띁?곗뒪) ?먮룞 ?낅줈???쒖옉! ???묒듅以鍮?
 setlocal EnableDelayedExpansion
 set "GH_PATH=gh"
 if exist "C:\Program Files\GitHub CLI\gh.exe" set "GH_PATH=C:\Program Files\GitHub CLI\gh.exe"
 
 "%GH_PATH%" auth status >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [🚨경고🚨] GitHub CLI 로그인이 안 되어 있습니다! 
-    echo 앗 대표님! 터미널을 여시고 `gh auth login` 을 입력해서 브라우저 로그인을 1번만 진행해 주세요!
+    echo [?슚寃쎄퀬?슚] GitHub CLI 濡쒓렇?몄씠 ???섏뼱 ?덉뒿?덈떎! 
+    echo ????쒕떂! ?곕??먯쓣 ?ъ떆怨?`gh auth login` ???낅젰?댁꽌 釉뚮씪?곗? 濡쒓렇?몄쓣 1踰덈쭔 吏꾪뻾??二쇱꽭??
 ) else (
-    echo 깃허브 업로드 엔진 점화... (용량 리미트 해제!)
-    "%GH_PATH%" release create "v1.0.1" "Inno_Output\YegomCapture_Setup_v1.0.1.exe" -t "YegomCapture v1.0.1 정식 릴리즈" -n "시작프로그램 자동실행 버그 픽스 + 최신 패치 반영 버전입니다. 🚀"
+    echo 源껎뿀釉??낅줈???붿쭊 ?먰솕... (?⑸웾 由щ????댁젣!)
+    "%GH_PATH%" release create "v1.0.2" "Inno_Output\YegomCapture_Setup_v1.0.2.exe" -t "YegomCapture v1.0.2 ?뺤떇 由대━利? -n "?쒖옉?꾨줈洹몃옩 ?먮룞?ㅽ뻾 踰꾧렇 ?쎌뒪 + 理쒖떊 ?⑥튂 諛섏쁺 踰꾩쟾?낅땲?? ??"
     if !errorlevel! equ 0 (
-        echo 💸 업로드 완벽 성공! GitHub Releases 페이지에서 확인하세요!
+        echo ?뮯 ?낅줈???꾨꼍 ?깃났! GitHub Releases ?섏씠吏?먯꽌 ?뺤씤?섏꽭??
     ) else (
-        echo [에러] 엇, 이미 v1.0.1 릴리즈가 있거나 업로드에 실패했습니다. 버전 태그를 올려주세요!
+        echo [?먮윭] ?? ?대? v1.0.2 由대━利덇? ?덇굅???낅줈?쒖뿉 ?ㅽ뙣?덉뒿?덈떎. 踰꾩쟾 ?쒓렇瑜??щ젮二쇱꽭??
     )
 )
 echo.
 pause
+
