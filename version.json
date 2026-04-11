@@ -1,0 +1,5 @@
+{
+  "latest_version": "1.0.3",
+  "download_url": "https://capture.yegomne.com",
+  "release_notes": "관리자 권한(UAC) 대응. 설치창 위에서도 단축키가 캡쳐가 되도록 권한을 수정했습니다. 🚀"
+}
