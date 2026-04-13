@@ -1,11 +1,11 @@
 [Setup]
 AppName=예곰 캡쳐 프로그램
-AppVersion=1.0.3
+AppVersion=1.0.4
 AppPublisher=Yegom Inc.
 DefaultDirName={pf}\YegomCapture
 DefaultGroupName=예곰 캡쳐
 OutputDir=.\Inno_Output
-OutputBaseFilename=YegomCapture_Setup_v1.0.3
+OutputBaseFilename=YegomCapture_Setup_v1.0.4
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin
@@ -34,7 +34,12 @@ Source: "dist\main.exe"; DestDir: "{app}"; Flags: ignoreversion
 [Icons]
 Name: "{group}\예곰 캡쳐 앱"; Filename: "{app}\main.exe"
 Name: "{commondesktop}\예곰 캡쳐 앱"; Filename: "{app}\main.exe"; Tasks: desktopicon
-Name: "{commonstartup}\예곰 캡쳐 앱"; Filename: "{app}\main.exe"
 
 [Run]
 Filename: "{app}\main.exe"; Description: "예곰 캡쳐 프로그램 지금 바로 실행하기"; Flags: nowait postinstall skipifsilent
+; 작업 스케줄러 등록 (관리자 권한 자동 시작)
+Filename: "schtasks.exe"; Parameters: "/create /tn ""YegomCapture"" /tr ""\""{app}\main.exe\"""" /sc onlogon /rl highest /f"; Flags: runhidden
+
+[UninstallRun]
+; 앱 삭제 시 작업 스케줄러 제거
+Filename: "schtasks.exe"; Parameters: "/delete /tn ""YegomCapture"" /f"; Flags: runhidden

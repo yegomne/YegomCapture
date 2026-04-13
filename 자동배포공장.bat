@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 echo ===========================================
 echo ?? ?닿낵?μ쓽 媛?곹솚寃?湲곕컲 諛고룷 怨듭옣 ??
@@ -31,7 +31,7 @@ echo.
 echo ===========================================
 echo [SUCCESS] 媛踰쇱슫 諛고룷 ?뚯씪 留뚮뱾湲??꾨즺! ?뮯
 echo ===========================================
-echo 배포된 파일: Inno_Output\YegomCapture_Setup_v1.0.3.exe
+echo 배포된 파일: Inno_Output\YegomCapture_Setup_v1.0.4.exe
 echo.
 echo [4/3] GitHub Releases (?덊띁?곗뒪) ?먮룞 ?낅줈???쒖옉! ???묒듅以鍮?
 setlocal EnableDelayedExpansion
@@ -44,13 +44,13 @@ if %errorlevel% neq 0 (
     echo ????쒕떂! ?곕??먯쓣 ?ъ떆怨?`gh auth login` ???낅젰?댁꽌 釉뚮씪?곗? 濡쒓렇?몄쓣 1踰덈쭔 吏꾪뻾??二쇱꽭??
 ) else (
     echo 源껎뿀釉??낅줈???붿쭊 ?먰솕... (?⑸웾 由щ????댁젣!)
-    "%GH_PATH%" release create "v1.0.3" "Inno_Output\YegomCapture_Setup_v1.0.3.exe" -t "YegomCapture v1.0.3 정식 릴리즈" -n "관리자 권한(UAC) 대응. 설치창 위에서도 단축키가 캡쳐가 되도록 권한을 수정했습니다. 🚀"
+    "%GH_PATH%" release create "v1.0.4" "Inno_Output\YegomCapture_Setup_v1.0.4.exe" -t "YegomCapture v1.0.4 정식 릴리즈" -n "관리자 권한(UAC) 대응. 설치창 위에서도 단축키가 캡쳐가 되도록 권한을 수정했습니다. 🚀"
     if !errorlevel! equ 0 (
         echo ?뮯 ?낅줈???꾨꼍 ?깃났! GitHub Releases ?섏씠吏?먯꽌 ?뺤씤?섏꽭??
     ) else (
-        echo [에러] 이미 이 버전 v1.0.3 릴리즈가 있거나 업로드에 실패했습니다. 버전 태그를 올려주세요.
+        echo [에러] 이미 이 버전 v1.0.4 릴리즈가 있거나 업로드에 실패했습니다. 버전 태그를 올려주세요.
     )
 )
 echo.
-pause
+
 

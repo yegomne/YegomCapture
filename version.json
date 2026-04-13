@@ -1,5 +1,5 @@
 {
-  "latest_version": "1.0.3",
+  "latest_version": "1.0.4",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "관리자 권한(UAC) 대응. 설치창 위에서도 단축키가 캡쳐가 되도록 권한을 수정했습니다. 🚀"
+  "release_notes": "부팅 시 자동 실행이 안되는 윈도우 보안 정책을 작업 스케줄러 우회로 완벽하게 해결! 🚀"
 }
