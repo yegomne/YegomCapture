@@ -1,181 +1,290 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YegomneCapture - 프리미엄 캡쳐 솔루션</title>
+    <title>YegomneCapture - APEX Premium SaaS</title>
     <link rel="icon" href="icon.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apex: {
+                            bg: 'hsl(260, 87%, 3%)',
+                            accent: 'hsl(121, 95%, 76%)',
+                            fg: 'hsl(40, 6%, 95%)',
+                            card: 'rgba(255, 255, 255, 0.03)',
+                            border: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Geist Sans"', 'Pretendard', 'sans-serif'],
+                    },
+                    animation: {
+                        'marquee': 'marquee 40s linear infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 10px hsl(121, 95%, 76%, 0.5)' },
+                            '100%': { boxShadow: '0 0 30px hsl(121, 95%, 76%, 0.8)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { font-family: 'Pretendard', sans-serif; background-color: #070707; color: #fff; }
-        .glass-header { background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .gradient-text { background: linear-gradient(135deg, #a78bfa, #60a5fa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, transparent 70%); z-index: -1; }
+        @import url('https://fonts.googleapis.com/css2?family=Geist&display=swap');
+        
+        body { 
+            background-color: hsl(260, 87%, 3%); 
+            color: hsl(40, 6%, 95%); 
+            overflow-x: hidden;
+        }
+        
+        .liquid-glass { 
+            background: rgba(10, 5, 20, 0.6); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        .hero-glow { 
+            position: absolute; 
+            top: -10%; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 800px; 
+            height: 800px; 
+            background: radial-gradient(circle, rgba(135, 250, 139, 0.1) 0%, transparent 70%); 
+            z-index: -1; 
+            pointer-events: none;
+        }
+
+        .cta-btn {
+            background-color: hsl(121, 95%, 76%);
+            color: hsl(260, 87%, 3%);
+            box-shadow: 0 0 20px rgba(135, 250, 139, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .cta-btn:hover {
+            box-shadow: 0 0 40px rgba(135, 250, 139, 0.6);
+            transform: translateY(-2px) scale(1.02);
+            background-color: hsl(121, 95%, 86%);
+        }
+        
+        .marquee-container {
+            display: flex;
+            overflow: hidden;
+            white-space: nowrap;
+            background: linear-gradient(90deg, transparent, rgba(135, 250, 139, 0.05) 50%, transparent);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 1rem 0;
+            margin: 3rem 0;
+        }
+        
+        .marquee-content {
+            display: flex;
+            flex-shrink: 0;
+            width: max-content;
+        }
     </style>
 </head>
-<body class="relative overflow-x-hidden">
+<body class="antialiased">
 
     <!-- Header -->
-    <header class="fixed top-0 w-full z-50 glass-header">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="font-bold text-xl tracking-wide flex items-center gap-2 text-white">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    <header class="fixed top-0 left-0 right-0 z-50 bg-apex-bg/90 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-apex-accent rounded flex items-center justify-center text-apex-bg font-bold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
-                YegomneCapture
+                <span class="font-bold text-xl tracking-tight text-white">YegomneCapture</span>
             </div>
-            <nav class="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
-                <a href="#features" class="hover:text-white transition">기능소개</a>
-                <a href="#guide" class="hover:text-white transition">설치안내</a>
-                <span class="hover:text-white transition cursor-default">고객지원 (yegomne@gmail.com)</span>
+            <nav class="hidden md:flex gap-8 text-sm font-medium text-gray-300">
+                <a href="#features" class="hover:text-apex-accent transition-colors">핵심 기능</a>
+                <a href="#guide" class="hover:text-apex-accent transition-colors">빠른 설치 가이드</a>
+                <a href="#support" class="hover:text-apex-accent transition-colors">고객 지원</a>
             </nav>
-            <a href="https://github.com/yegomne/YegomCapture/releases/download/v1.0.4/YegomCapture_Setup_v1.0.4.exe" class="bg-white text-black px-5 py-0.5 leading-[32px] rounded-full text-sm font-bold hover:bg-gray-200 transition inline-block text-center h-10 box-border">다운로드</a>
+            <a href="https://github.com/yegomne/YegomCapture/releases/latest/download/YegomCapture_Setup_v1.0.exe" class="hidden md:flex items-center gap-2 bg-apex-accent/10 border border-apex-accent/30 text-apex-accent px-5 py-2 rounded-full text-sm font-bold hover:bg-apex-accent hover:text-apex-bg transition-all">
+                지금 다운로드
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            </a>
         </div>
     </header>
+
+    <!-- Infinite Marquee (Below Header) -->
+    <div class="marquee-container mt-[64px] mb-6 pt-3 pb-3 bg-black/60 border-y border-white/5 relative">
+        <div class="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-apex-bg to-transparent z-10"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-apex-bg to-transparent z-10"></div>
+        <div class="marquee-content animate-marquee flex items-center gap-8 text-lg font-bold text-apex-accent opacity-90">
+            <span class="flex items-center gap-3">⚡ 세상에서 가장 완벽한 화면 캡처 툴 ✦ 크리에이터를 위한 100% 완전 무료 ✦ CPU 점유율 1%의 미친 초경량 최적화 ✦ 잘림 없는 자동 스크롤 인식 캡처 ✦</span>
+            <span class="flex items-center gap-3">⚡ 세상에서 가장 완벽한 화면 캡처 툴 ✦ 크리에이터를 위한 100% 완전 무료 ✦ CPU 점유율 1%의 미친 초경량 최적화 ✦ 잘림 없는 자동 스크롤 인식 캡처 ✦</span>
+        </div>
+        <div class="marquee-content animate-marquee flex items-center gap-8 text-lg font-bold text-apex-accent opacity-90" aria-hidden="true">
+            <span class="flex items-center gap-3 ml-8">⚡ 세상에서 가장 완벽한 화면 캡처 툴 ✦ 크리에이터를 위한 100% 완전 무료 ✦ CPU 점유율 1%의 미친 초경량 최적화 ✦ 잘림 없는 자동 스크롤 인식 캡처 ✦</span>
+            <span class="flex items-center gap-3">⚡ 세상에서 가장 완벽한 화면 캡처 툴 ✦ 크리에이터를 위한 100% 완전 무료 ✦ CPU 점유율 1%의 미친 초경량 최적화 ✦ 잘림 없는 자동 스크롤 인식 캡처 ✦</span>
+        </div>
+    </div>
 
     <div class="hero-glow"></div>
 
     <!-- Hero Section -->
-    <section class="pt-40 pb-20 px-6 text-center max-w-4xl mx-auto z-10 relative">
-        <div class="inline-block mb-6 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-sm font-semibold tracking-wide">
-            🎉 YegomneCapture 1.0.4 정식 출시
-        </div>
-        <h1 class="text-5xl md:text-7xl font-extrabold mb-8 leading-tight tracking-tight">
-            보이는 모든 것을 <br/> <span class="gradient-text">완벽하게 캡쳐하다</span>
-        </h1>
-        <p class="text-gray-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-            복잡한 설정 없이 직관적인 캡쳐 한 번으로 끝! 강력한 화면 반투명 고정(Pin) 기능과 가벼운 최적화로, 실무자의 작업 효율을 200% 압도적으로 끌어올려 주는 가장 스마트한 캡쳐 솔루션입니다.
-        </p>
-        <div class="flex gap-4 justify-center items-center">
-            <a href="https://github.com/yegomne/YegomCapture/releases/download/v1.0.4/YegomCapture_Setup_v1.0.4.exe" class="block text-center bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-8 py-4 rounded-full text-lg font-bold shadow-lg shadow-purple-500/25 transition-all transform hover:-translate-y-1 w-full max-w-sm">
-                Windows용 무료 다운로드
-            </a>
-        </div>
-        <p class="mt-4 text-sm text-gray-500">Windows 10/11 전용 (64-bit)</p>
-    </section>
-
-    <!-- Key Features Bento Box -->
-    <section id="features" class="py-20 px-6 max-w-6xl mx-auto">
-        <div class="text-center mb-16 relative">
-            <h2 class="text-4xl font-extrabold mb-4 tracking-tight">왜 YegomneCapture를 선택해야 할까요?</h2>
-            <p class="text-gray-400 text-lg">압도적인 퍼포먼스와 필수 기능만 모았습니다.</p>
+    <section class="pt-12 pb-16 px-6 text-center max-w-4xl mx-auto z-10 relative">
+        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-5 py-1.5 text-sm font-bold text-emerald-400 mb-8 backdrop-blur-sm">
+            <span class="text-base leading-none">🚀</span> V1.0.4 업데이트 - 압도적인 속도
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="group relative bg-[#121212] border border-[#2a2a2a] overflow-hidden p-8 rounded-3xl hover:-translate-y-2 hover:shadow-[0_0_40px_-5px_rgba(167,139,250,0.2)] hover:border-purple-500/50 transition-all duration-300 ease-in-out cursor-default">
-                <!-- Hover Glow Background -->
-                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
-                <div class="relative z-10 w-14 h-14 bg-gradient-to-br from-purple-500/10 to-[#191523] rounded-2xl flex items-center justify-center mb-6 text-purple-400 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                </div>
-                <h3 class="relative z-10 text-2xl font-bold mb-3 text-white group-hover:text-purple-300 transition-colors duration-300">4K 초고화질 지원</h3>
-                <p class="relative z-10 text-gray-400 text-[15px] leading-relaxed group-hover:text-gray-300 transition-colors duration-300">픽셀 하나까지 선명하게 캡쳐합니다. 레티나 및 고해상도 모니터에서도 깨짐 없는 완벽한 원본 화질을 유지합니다.</p>
-            </div>
-            
-            <div class="group relative bg-[#121212] border border-[#2a2a2a] overflow-hidden p-8 rounded-3xl hover:-translate-y-2 hover:shadow-[0_0_40px_-5px_rgba(96,165,250,0.2)] hover:border-blue-500/50 transition-all duration-300 ease-in-out cursor-default">
-                <!-- Hover Glow Background -->
-                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight text-white break-keep">
+            눈에 보이는 모든 것을 <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-apex-accent to-emerald-400">완벽하게 기록하다</span>
+        </h1>
+        
+        <p class="text-gray-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed break-keep">
+            복잡한 설정 없이 직관적인 캡쳐 한 번으로 끝! 강력한 화면 반투명 고정(Pin) 기능과<br class="hidden md:block"/>가벼운 최적화로 실무자의 작업 효율을 200% 압도적으로 끌어올려 줍니다.
+        </p>
+        
+        <div class="flex gap-4 justify-center items-center">
+            <a href="https://github.com/yegomne/YegomCapture/releases/latest/download/YegomCapture_Setup_v1.0.exe" class="cta-btn text-apex-bg px-10 py-5 rounded-full text-xl font-bold transition-all max-w-sm flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(135,250,139,0.3)]">
+                Windows용 다운로드
+                <svg class="w-5 h-5 opacity-80" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.6L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/></svg>
+            </a>
+        </div>
+        <p class="mt-6 text-sm text-gray-500 font-medium tracking-wide">Windows 10/11 전용 (64-bit)</p>
+    </section>
 
-                <div class="relative z-10 w-14 h-14 bg-gradient-to-br from-blue-500/10 to-[#151c27] rounded-2xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                </div>
-                <h3 class="relative z-10 text-2xl font-bold mb-3 text-white group-hover:text-blue-300 transition-colors duration-300">자동 스크롤 화면 캡쳐</h3>
-                <p class="relative z-10 text-gray-400 text-[15px] leading-relaxed group-hover:text-gray-300 transition-colors duration-300">잘리는 화면 없이 긴 웹페이지나 문서도 한 번에! 스크롤을 자동으로 인식하여 완벽하게 하나로 이어 붙여줍니다.</p>
-            </div>
-            
-            <div class="group relative bg-[#121212] border border-[#2a2a2a] overflow-hidden p-8 rounded-3xl hover:-translate-y-2 hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.2)] hover:border-green-500/50 transition-all duration-300 ease-in-out cursor-default lg:col-span-1 md:col-span-2">
-                <!-- Hover Glow Background -->
-                <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <!-- Chess Board Features -->
+    <section id="features" class="py-20 px-6 max-w-6xl mx-auto overflow-hidden">
+        <div class="text-center mb-24 relative">
+            <h2 class="text-4xl font-extrabold mb-4 tracking-tight text-white">왜 YegomneCapture를 선택해야 할까요?</h2>
+            <p class="text-gray-400 text-lg">혁신적인 시각화 도구로 작업 속도를 비약적으로 높입니다.</p>
+        </div>
 
-                <div class="relative z-10 w-14 h-14 bg-gradient-to-br from-green-500/10 to-[#142217] rounded-2xl flex items-center justify-center mb-6 text-green-400 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <!-- Feature 1: Image Right, Text Left -->
+        <div class="flex flex-col md:flex-row items-center gap-12 mb-24">
+            <div class="flex-1 md:pr-12 text-center md:text-left">
+                <div class="inline-flex w-16 h-16 bg-apex-accent/10 rounded-2xl items-center justify-center mb-6 text-apex-accent border border-apex-accent/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="relative z-10 text-2xl font-bold mb-3 text-white group-hover:text-green-300 transition-colors duration-300">초경량 리소스 점유율</h3>
-                <p class="relative z-10 text-gray-400 text-[15px] leading-relaxed group-hover:text-gray-300 transition-colors duration-300">백그라운드에서 실행되어도 시스템 속도에 전혀 영향을 주지 않습니다. 단 1%의 메모리 공간만 사용하는 압도적 가벼움을 경험하세요.</p>
+                <h3 class="text-3xl font-bold mb-4 text-white">4K 초고화질 지원</h3>
+                <p class="text-gray-400 text-lg leading-relaxed">
+                    픽셀 하나까지 선명하게 캡쳐합니다. 레티나 및 고해상도 모니터에서도 깨짐 없는 완벽한 원본 화질을 유지합니다. 프로페셔널한 프레임 스냅샷을 쉽게 얻으세요.
+                </p>
+            </div>
+            <div class="flex-1 w-full relative">
+                <div class="absolute inset-0 bg-apex-accent/20 blur-[100px] rounded-full"></div>
+                <div class="liquid-glass rounded-3xl p-2 relative aspect-video flex-1 overflow-hidden transform hover:-translate-y-2 transition-transform duration-500">
+                    <img src="img/4k_capture.png" alt="4K 초고화질 지원" class="w-full h-full object-cover rounded-2xl border border-white/5 shadow-inner">
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 2: Image Left, Text Right -->
+        <div class="flex flex-col md:flex-row-reverse items-center gap-12 mb-24">
+            <div class="flex-1 md:pl-12 text-center md:text-left">
+                <div class="inline-flex w-16 h-16 bg-blue-500/10 rounded-2xl items-center justify-center mb-6 text-blue-400 border border-blue-500/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <h3 class="text-3xl font-bold mb-4 text-white">자동 스크롤 화면 캡쳐</h3>
+                <p class="text-gray-400 text-lg leading-relaxed">
+                    잘리는 화면 없이 긴 웹페이지나 문서도 한 번에! 스크롤을 자동으로 인식하여 완벽하게 하나로 이어 붙여줍니다. 끊임없는 정보 보존이 가능해집니다.
+                </p>
+            </div>
+            <div class="flex-1 w-full relative">
+                <div class="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full"></div>
+                <div class="liquid-glass rounded-3xl p-2 relative aspect-video flex-1 overflow-hidden transform hover:-translate-y-2 transition-transform duration-500">
+                    <img src="img/autoscroll.png" alt="자동 스크롤 화면 캡쳐" class="w-full h-full object-cover rounded-2xl border border-white/5 shadow-inner">
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3: Image Right, Text Left -->
+        <div class="flex flex-col md:flex-row items-center gap-12">
+            <div class="flex-1 md:pr-12 text-center md:text-left">
+                <div class="inline-flex w-16 h-16 bg-purple-500/10 rounded-2xl items-center justify-center mb-6 text-purple-400 border border-purple-500/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-3xl font-bold mb-4 text-white">초경량 리소스 점유율</h3>
+                <p class="text-gray-400 text-lg leading-relaxed">
+                    백그라운드에서 실행되어도 시스템 속도에 전혀 영향을 주지 않습니다. 단 1%의 메모리 공간만 사용하는 압도적 가벼움을 직접 체감해 보세요.
+                </p>
+            </div>
+            <div class="flex-1 w-full relative">
+                <div class="absolute inset-0 bg-purple-500/20 blur-[100px] rounded-full"></div>
+                <div class="liquid-glass rounded-3xl p-2 relative aspect-video flex-1 overflow-hidden transform hover:-translate-y-2 transition-transform duration-500">
+                    <img src="img/lightweight.png" alt="초경량 리소스 점유율" class="w-full h-full object-cover rounded-2xl border border-white/5 shadow-inner">
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Installation Steps -->
-    <section id="guide" class="py-20 px-6 max-w-5xl mx-auto">
+    <!-- Installation section -->
+    <section id="guide" class="py-20 px-6 max-w-5xl mx-auto border-t border-white/5">
         <div class="text-center mb-16">
-            <h2 class="text-3xl font-bold mb-4">단 1분, 설치부터 실행까지</h2>
+            <h2 class="text-3xl font-bold mb-4 text-white">단 1분, 설치부터 실행까지</h2>
             <p class="text-gray-400">다운로드 후 복잡한 설정 없이 바로 사용 가능합니다.</p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-900/10 transition-all duration-300">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#211a2e] text-[#a78bfa]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <p class="text-[#a78bfa] text-xs font-bold tracking-[0.2em] mb-3">STEP 01</p>
+            <div class="liquid-glass border border-white/5 rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300">
+                <p class="text-apex-accent text-xs font-bold tracking-[0.2em] mb-3">STEP 01</p>
                 <h3 class="text-white text-xl font-bold mb-4">설치 파일 실행</h3>
-                <p class="text-[#8c8c8c] text-[15px] leading-relaxed">
-                    다운로드 폴더에서 <span class="text-gray-300">setup.exe</span>를 실행하세요. 최신 버전의 안정적인 설치 환경을 제공합니다.
+                <p class="text-gray-400 text-[15px] leading-relaxed">
+                    다운로드 폴더에서 <span class="text-white">setup.exe</span>를 실행하세요. 최신 버전의 안정적인 설치 환경을 제공합니다.
                 </p>
             </div>
-
-            <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#182335] text-[#60a5fa]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <p class="text-[#60a5fa] text-xs font-bold tracking-[0.2em] mb-3">STEP 02</p>
+            <div class="liquid-glass border border-white/5 rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300">
+                <p class="text-emerald-400 text-xs font-bold tracking-[0.2em] mb-3">STEP 02</p>
                 <h3 class="text-white text-xl font-bold mb-4">'추가 정보' 클릭</h3>
-                <p class="text-[#8c8c8c] text-[15px] leading-relaxed">
-                    Windows 보호 알림 시 안내글 속의 <span class="border-b border-[#555] text-gray-300 pb-[1px]">'추가 정보'</span> 문구를 클릭합니다.
+                <p class="text-gray-400 text-[15px] leading-relaxed">
+                    Windows 보호 알림 시 안내글 속의 <span class="border-b border-gray-500 text-white pb-[1px]">'추가 정보'</span> 문구를 클릭합니다.
                 </p>
             </div>
-
-            <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pink-900/10 transition-all duration-300">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#2a1d2c] text-[#d8b4fe]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-2.5-13.5v7a.5.5 0 00.77.416l5.5-3.5a.5.5 0 000-.832l-5.5-3.5a.5.5 0 00-.77.416z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <p class="text-[#d8b4fe] text-xs font-bold tracking-[0.2em] mb-3">STEP 03</p>
+            <div class="liquid-glass border border-white/5 rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300">
+                <p class="text-blue-400 text-xs font-bold tracking-[0.2em] mb-3">STEP 03</p>
                 <h3 class="text-white text-xl font-bold mb-4">'실행' 버튼 클릭</h3>
-                <p class="text-[#8c8c8c] text-[15px] leading-relaxed">
+                <p class="text-gray-400 text-[15px] leading-relaxed">
                     우측 하단에 나타나는 '실행' 버튼을 클릭하여 설치를 완료합니다. 즉시 프로그램을 시작할 수 있습니다.
                 </p>
             </div>
         </div>
-
+        
         <!-- V3 백신 안내 -->
-        <div class="mt-12 bg-[#121212] border border-amber-500/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start relative overflow-hidden group">
-            <!-- Alert glow -->
-            <div class="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent pointer-events-none"></div>
+        <div class="mt-12 bg-[#121212]/50 border border-apex-accent/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-r from-apex-accent/5 to-transparent pointer-events-none"></div>
             
-            <div class="w-12 h-12 shrink-0 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 shadow-inner group-hover:scale-110 transition-transform duration-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+            <div class="w-12 h-12 shrink-0 rounded-xl bg-apex-accent/10 flex items-center justify-center text-apex-accent border border-apex-accent/20 shadow-inner group-hover:scale-110 transition-transform duration-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             </div>
             
             <div class="relative z-10 flex-1">
-                <h3 class="text-amber-400 font-bold text-lg mb-2">V3 백신 등에서 알림 메시지가 뜰 때</h3>
+                <h3 class="text-apex-accent font-bold text-lg mb-2">V3 백신 등에서 알림 메시지가 뜰 때</h3>
                 <p class="text-gray-300 text-[15px] leading-relaxed mb-6">
-                    예곰 캡처(YegomCapture)는 100% 안전하게 <span class="text-white font-semibold">자체 개발된 소프트웨어</span>입니다. 다만, 갓 배포된 최신 프로그램 특성상 V3 같은 백신 프로그램이 '처음 보는 파일'로 인식하여 일시적으로 보안 검사 창을 띄울 수 있습니다. <span class="text-amber-300">바이러스가 아니니 절대 안심하시고</span>, 아래의 간단한 2단계만 진행해 주시면 정상적으로 사용하실 수 있습니다!
+                    예곰 캡처는 100% 안전하게 <span class="text-white font-semibold">자체 개발된 소프트웨어</span>입니다. 최신 프로그램 특성상 V3 같은 백신이 인식하지 못해 보안 검사를 띄울 수 있습니다. 안심하시고 아래 단계를 진행해 주세요.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="bg-[#181818] rounded-xl p-5 flex-1 border border-[#2a2a2a] hover:border-amber-500/20 transition-colors">
+                    <div class="liquid-glass rounded-xl p-5 flex-1 border border-white/5">
                         <p class="text-white font-bold text-[15px] mb-2 flex items-center gap-2">
-                            <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-1 rounded-md">1단계</span>
+                            <span class="bg-apex-accent/20 text-apex-accent text-xs px-2 py-1 rounded-md">1단계</span>
                             [검사 중지] 누르기
                         </p>
-                        <p class="text-[#8c8c8c] text-sm leading-relaxed">'앱 격리 검사 중'이라는 주황색 알림 창이 뜨면 당황하지 마시고, 화면 왼쪽 아래에 있는 <span class="text-gray-300 font-medium">[검사 중지]</span> 버튼을 클릭해 주세요.</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">'앱 격리 검사 중' 창이 뜨면 <span class="text-gray-200 font-medium">[검사 중지]</span>를 클릭하세요.</p>
                     </div>
-                    <div class="bg-[#181818] rounded-xl p-5 flex-1 border border-[#2a2a2a] hover:border-amber-500/20 transition-colors">
+                    <div class="liquid-glass rounded-xl p-5 flex-1 border border-white/5">
                         <p class="text-white font-bold text-[15px] mb-2 flex items-center gap-2">
-                            <span class="bg-amber-500/20 text-amber-400 text-xs px-2 py-1 rounded-md">2단계</span>
+                            <span class="bg-apex-accent/20 text-apex-accent text-xs px-2 py-1 rounded-md">2단계</span>
                             [파일 해시 예외 처리] 누르기
                         </p>
-                        <p class="text-[#8c8c8c] text-sm leading-relaxed">이어서 '앱 격리 검사 중지' 화면으로 바뀌면, 왼쪽 아래의 <span class="text-gray-300 font-medium">[파일 해시 예외 처리]</span> 버튼을 클릭해 주세요.</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">이후 나타나는 창에서 <span class="text-gray-200 font-medium">[파일 해시 예외 처리]</span>를 클릭하시면 됩니다.</p>
                     </div>
                 </div>
             </div>
@@ -183,22 +292,23 @@
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-[#2a2a2a] pt-12 pb-8 mt-12 bg-[#0a0a0a]">
+    <footer class="border-t border-white/5 pt-12 pb-8 mt-12 bg-[#05010a]">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="text-gray-500 text-sm">
+            <div class="text-gray-500 text-sm flex items-center gap-2">
+                <div class="w-6 h-6 rounded bg-apex-accent/20 text-apex-accent flex items-center justify-center text-xs font-bold">Y</div>
                 &copy; 2026 YegomneCapture. All rights reserved.
             </div>
             <div class="flex gap-6 text-sm text-gray-500">
                 <button onclick="openModal('termsModal')" class="hover:text-white transition">이용약관</button>
                 <button onclick="openModal('privacyModal')" class="hover:text-white transition">개인정보처리방침</button>
-                <span class="hover:text-white transition cursor-default">고객지원 / 문의: yegomne@gmail.com</span>
+                <span class="hover:text-white transition cursor-default">고객지원 문의: yegomne@gmail.com</span>
             </div>
         </div>
     </footer>
 
     <!-- Modals -->
     <div id="termsModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col transform scale-95 transition-transform duration-300">
+        <div class="liquid-glass border border-white/10 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col transform scale-95 transition-transform duration-300">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white">이용약관</h3>
                 <button onclick="closeModal('termsModal')" class="text-gray-400 hover:text-white transition cursor-pointer">
@@ -215,7 +325,6 @@
                 
                 제3조 (서비스의 제공 및 변경)
                 1. 회사는 사용자에게 화면 캡쳐, 녹화 및 편집 기능을 제공합니다.
-                2. 회사는 서비스의 품질 향상을 위해 언제든지 서비스의 일부 또는 전부를 변경, 추가, 종료할 수 있습니다.
                 
                 제4조 (사용자의 의무)
                 1. 사용자는 본 약관 및 관련 법령을 준수해야 하며, 회사의 업무를 방해하는 행위를 해서는 안 됩니다.
@@ -230,7 +339,7 @@
     </div>
 
     <div id="privacyModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-[#121212] border border-[#2a2a2a] rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col transform scale-95 transition-transform duration-300">
+        <div class="liquid-glass border border-white/10 rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col transform scale-95 transition-transform duration-300">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white">개인정보처리방침</h3>
                 <button onclick="closeModal('privacyModal')" class="text-gray-400 hover:text-white transition cursor-pointer">
@@ -241,24 +350,12 @@
                 YegomneCapture(이하 "회사")는 사용자의 개인정보를 중요하게 생각하며, "개인정보보호법" 등 관련 법령을 준수하고 있습니다.
                 
                 1. 수집하는 개인정보 항목
-                본 서비스는 기본적으로 오프라인 환경에서 동작하며, 화면 캡쳐 및 녹화 결과물은 사용자의 로컬 PC에만 저장됩니다. 따라서 회사는 사용자의 추가 동의 없이 어떠한 개인정보(이름, 이메일, 연락처 등)도 수집, 저장, 전송하지 않습니다.
-                단, 오류 보고 및 고객 지원 요청 시 이메일 주소 및 OS 버전 정보가 자발적으로 수집될 수 있습니다.
+                본 서비스는 기본적으로 오프라인 환경에서 동작하며, 화면 캡쳐 및 녹화 결과물은 사용자의 로컬 파이프라인에만 저장됩니다. 사용자 추가 동의 없이 개인정보는 수집하지 않습니다.
                 
-                2. 개인정보의 수집 및 이용 목적
-                수집된 정보는 다음의 목적을 위해서만 이용됩니다.
-                - 서비스 장애 분석 및 품질 개선
-                - 고객 문의에 대한 답변 및 지원
+                2. 정보 보유
+                수집 정보 파기.
                 
-                3. 개인정보의 보유 및 이용 기간
-                회사는 원칙적으로 고객 문의 처리가 완료된 후 해당 개인정보를 지체 없이 파기합니다.
-                
-                4. 개인정보의 제3자 제공
-                회사는 사용자의 사전 동의 없이 개인정보를 외부나 제3자에게 제공하지 않습니다.
-                
-                5. 개인정보 보호를 위한 기술적 대책
-                회사는 사용자의 정보 보호를 위해 최선의 보안 기술을 적용하여 안전하게 관리하고자 노력하고 있습니다.
-                
-                본 방침은 2026년 3월 31일부터 시행됩니다.
+                본 방침은 2026년부터 시행됩니다.
             </div>
         </div>
     </div>
@@ -271,14 +368,13 @@
             
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            // Allow display step to complete before transitioning opacity
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 modal.classList.add('opacity-100');
                 modalContent.classList.remove('scale-95');
                 modalContent.classList.add('scale-100');
             }, 10);
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal(modalId) {
@@ -293,24 +389,15 @@
             setTimeout(() => {
                 modal.classList.remove('flex');
                 modal.classList.add('hidden');
-            }, 300); // Wait for transition
+            }, 300);
             document.body.style.overflow = '';
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             if (event.target.id === 'termsModal' || event.target.id === 'privacyModal') {
                 closeModal(event.target.id);
             }
         }
     </script>
-
-    <!-- Custom Scrollbar Style for Modal -->
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
-    </style>
 </body>
 </html>

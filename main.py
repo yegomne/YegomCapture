@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "1.0.4"
+CURRENT_VERSION = "1.0.5"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
