@@ -1,5 +1,5 @@
 {
-  "latest_version": "1.0.6",
+  "latest_version": "1.0.7",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "미리보기 화면에서 마우스 드래그로 빨간 사각형 그리기 기능 추가 ✨"
+  "release_notes": "업데이트 알림 '다시 보지 않기' 기능 추가"
 }

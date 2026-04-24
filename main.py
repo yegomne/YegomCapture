@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "1.0.6"
+CURRENT_VERSION = "1.0.7"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -531,6 +531,7 @@ class CaptureApp(QObject):
         self.hotkey_normal = "ctrl+space"
         self.hotkey_scroll = "ctrl+shift+space"
         self.hotkey_folder = "ctrl+alt+shift+x"
+        self.ignored_update_version = ""
         self.load_config()
         
         if not os.path.exists(self.save_dir):
@@ -567,14 +568,25 @@ class CaptureApp(QObject):
         )
 
     def show_update_popup(self, version, url, notes):
-        # PyQt6 환경에서 안전하게 팝업 띄우기
-        reply = QMessageBox.information(
-            None, 
-            "업데이트 알림 🚀",
-            f"새로운 버전(v{version})이 배포되었습니다!\n\n[업데이트 내용]\n{notes}\n\n지금 공식 홈페이지로 이동하시겠습니까?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes
-        )
+        if getattr(self, 'ignored_update_version', "") == version:
+            return
+
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("업데이트 알림 🚀")
+        msg_box.setText(f"새로운 버전(v{version})이 배포되었습니다!\n\n[업데이트 내용]\n{notes}\n\n지금 공식 홈페이지로 이동하시겠습니까?")
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        msg_box.setDefaultButton(QMessageBox.StandardButton.Yes)
+        
+        cb = QCheckBox("이 버전 업데이트 알림 다시 보지 않기")
+        msg_box.setCheckBox(cb)
+
+        reply = msg_box.exec()
+
+        if cb.isChecked():
+            self.ignored_update_version = version
+            self.save_config()
+
         if reply == QMessageBox.StandardButton.Yes and url:
             webbrowser.open(url)
 
@@ -639,6 +651,7 @@ class CaptureApp(QObject):
                     self.hotkey_normal = config.get("hotkey_normal", self.hotkey_normal)
                     self.hotkey_scroll = config.get("hotkey_scroll", self.hotkey_scroll)
                     self.hotkey_folder = config.get("hotkey_folder", self.hotkey_folder)
+                    self.ignored_update_version = config.get("ignored_update_version", getattr(self, 'ignored_update_version', ""))
             except Exception:
                 pass
 
@@ -652,7 +665,8 @@ class CaptureApp(QObject):
                 "auto_save": self.auto_save,
                 "hotkey_normal": self.hotkey_normal,
                 "hotkey_scroll": self.hotkey_scroll,
-                "hotkey_folder": self.hotkey_folder
+                "hotkey_folder": self.hotkey_folder,
+                "ignored_update_version": getattr(self, 'ignored_update_version', "")
             }
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
