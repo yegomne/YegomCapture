@@ -59,6 +59,7 @@ for html_file in ['index.html', '랜딩페이지V1.html']:
     # 정규식을 이용한 다운로드 링크 및 텍스트 자동 치환
     content = re.sub(r'YegomCapture_Setup_v[\d\.]+\.exe', f'YegomCapture_Setup_v{new_version}.exe', content)
     content = re.sub(r'YegomneCapture [\d\.]+ 정식', f'YegomneCapture {new_version} 정식', content)
+    content = re.sub(r'V[\d\.]+ 업데이트 -', f'V{new_version} 업데이트 -', content)
     with open(html_file, 'w', encoding='utf-8') as f:
         f.write(content)
 
