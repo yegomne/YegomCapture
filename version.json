@@ -1,5 +1,5 @@
 {
-  "latest_version": "1.0.5",
+  "latest_version": "1.0.6",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "랜딩페이지 디자인 무드 리뉴얼(프리미엄 다크모드 뷰 및 에셋 업데이트) ✨"
+  "release_notes": "미리보기 화면에서 마우스 드래그로 빨간 사각형 그리기 기능 추가 ✨"
 }

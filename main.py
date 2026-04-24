@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "1.0.5"
+CURRENT_VERSION = "1.0.6"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -93,21 +93,59 @@ class UpdateCheckerThread(QThread):
             # 의도된 침묵: 인터넷 연결 안됨, 404 에러 등은 그냥 무시함
             pass
 
+class DrawableLabel(QLabel):
+    def __init__(self, preview_window, parent=None):
+        super().__init__(parent)
+        self.preview = preview_window
+        self.drawing = False
+        self.start_point = QPoint()
+        self.end_point = QPoint()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drawing = True
+            self.start_point = event.position().toPoint()
+            self.end_point = self.start_point
+
+    def mouseMoveEvent(self, event):
+        if self.drawing:
+            self.end_point = event.position().toPoint()
+            self.update_display()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self.drawing:
+            self.end_point = event.position().toPoint()
+            self.drawing = False
+            self.update_display(commit=True)
+
+    def update_display(self, commit=False):
+        pt1 = (self.start_point.x(), self.start_point.y())
+        pt2 = (self.end_point.x(), self.end_point.y())
+        color = (0, 0, 255) # Red in BGR
+        thickness = 3
+        
+        if commit:
+            cv2.rectangle(self.preview.image_cv, pt1, pt2, color, thickness)
+            self.preview.refresh_image()
+            self.preview.copy_to_clipboard_silent()
+        else:
+            temp_cv_image = self.preview.image_cv.copy()
+            cv2.rectangle(temp_cv_image, pt1, pt2, color, thickness)
+            self.preview.refresh_image(temp_cv_image)
+
 class PreviewWindow(QMainWindow):
     def __init__(self, capture_app, image_cv, save_dir):
         super().__init__()
         self.capture_app = capture_app
-        self.image_cv = image_cv
+        self.image_cv = image_cv.copy()
         self.save_dir = save_dir
-        self.setWindowTitle("캡쳐 미리보기")
+        self.setWindowTitle("캡쳐 미리보기 (드래그하여 빨간 사각형 그리기)")
         
         self.central_widget = QWidget()
         self.layout = QVBoxLayout(self.central_widget)
         
-        self.image_label = QLabel()
-        self.q_image = cv2_to_qimage(self.image_cv)
-        self.pixmap = QPixmap.fromImage(self.q_image)
-        self.image_label.setPixmap(self.pixmap)
+        self.image_label = DrawableLabel(self)
+        self.refresh_image()
         
         scroll_area = QScrollArea()
         scroll_area.setWidget(self.image_label)
@@ -122,6 +160,13 @@ class PreviewWindow(QMainWindow):
         self.show()
         self.raise_()
         self.activateWindow()
+
+    def refresh_image(self, temp_cv=None):
+        img_to_show = temp_cv if temp_cv is not None else self.image_cv
+        self.q_image = cv2_to_qimage(img_to_show)
+        self.pixmap = QPixmap.fromImage(self.q_image)
+        self.image_label.setPixmap(self.pixmap)
+        self.image_label.adjustSize()
 
     def create_toolbar(self):
         toolbar = QToolBar("메인 툴바")
