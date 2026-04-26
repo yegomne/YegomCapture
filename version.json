@@ -1,5 +1,5 @@
 {
-  "latest_version": "1.0.7",
+  "latest_version": "1.0.8",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "업데이트 알림 '다시 보지 않기' 기능 추가"
+  "release_notes": "연속 캡쳐 시 이전 미리보기 창 잔상이 남는 문제 수정"
 }

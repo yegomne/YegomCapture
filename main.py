@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "1.0.7"
+CURRENT_VERSION = "1.0.8"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -806,6 +806,14 @@ class CaptureApp(QObject):
     def _start_capture(self, is_scroll):
         if hasattr(self, 'overlay') and self.overlay and self.overlay.isVisible():
             return
+
+        if hasattr(self, 'scroll_worker') and self.scroll_worker and self.scroll_worker.running:
+            self.scroll_worker.running = False
+
+        if hasattr(self, 'preview') and self.preview and self.preview.isVisible():
+            self.preview.close()
+            self.app.processEvents()
+            time.sleep(0.2)
 
         with mss.mss() as sct:
             monitor = sct.monitors[0]
