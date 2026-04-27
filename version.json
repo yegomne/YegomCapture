@@ -1,5 +1,5 @@
 {
-  "latest_version": "2.3",
+  "latest_version": "2.4",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "고해상도(4K 등) 모니터 및 배율 환경에서 프리뷰 이미지가 잘리거나 여백이 생기는 현상 완벽 수정 (DPI 스케일링 대응 완비)"
+  "release_notes": "미리보기창 이미지 동적 스케일링 기능 추가 및 크기 조절 시 잘림 현상 완벽 해결"
 }

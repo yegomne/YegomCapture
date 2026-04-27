@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "2.3"
+CURRENT_VERSION = "2.4"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -100,38 +100,85 @@ class DrawableLabel(QLabel):
         self.drawing = False
         self.start_point = QPoint()
         self.end_point = QPoint()
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+    def paintEvent(self, event):
+        if not hasattr(self.preview, 'pixmap') or self.preview.pixmap.isNull():
+            return
+            
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+        
+        scaled_pixmap = self.preview.pixmap.scaled(
+            self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+        )
+        
+        x_offset = (self.width() - scaled_pixmap.width()) // 2
+        y_offset = (self.height() - scaled_pixmap.height()) // 2
+        
+        painter.drawPixmap(x_offset, y_offset, scaled_pixmap)
+        
+        if self.drawing:
+            rect = QRect(self.start_point, self.end_point).normalized()
+            scale_ratio = scaled_pixmap.width() / self.preview.pixmap.width()
+            thickness = max(1, int(3 * scale_ratio))
+            pen = QPen(QColor(255, 0, 0), thickness, Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            painter.drawRect(rect)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drawing = True
             self.start_point = event.position().toPoint()
             self.end_point = self.start_point
+            self.update()
 
     def mouseMoveEvent(self, event):
         if self.drawing:
             self.end_point = event.position().toPoint()
-            self.update_display()
+            self.update()
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.drawing:
             self.end_point = event.position().toPoint()
             self.drawing = False
-            self.update_display(commit=True)
+            self.commit_drawing()
 
-    def update_display(self, commit=False):
-        pt1 = (self.start_point.x(), self.start_point.y())
-        pt2 = (self.end_point.x(), self.end_point.y())
+    def commit_drawing(self):
+        pt1 = self.map_to_image(self.start_point)
+        pt2 = self.map_to_image(self.end_point)
+        
         color = (0, 0, 255) # Red in BGR
         thickness = 3
         
-        if commit:
-            cv2.rectangle(self.preview.image_cv, pt1, pt2, color, thickness)
-            self.preview.refresh_image()
-            self.preview.copy_to_clipboard_silent()
-        else:
-            temp_cv_image = self.preview.image_cv.copy()
-            cv2.rectangle(temp_cv_image, pt1, pt2, color, thickness)
-            self.preview.refresh_image(temp_cv_image)
+        cv2.rectangle(self.preview.image_cv, pt1, pt2, color, thickness)
+        self.preview.refresh_image()
+        self.preview.copy_to_clipboard_silent()
+
+    def map_to_image(self, pos):
+        if not hasattr(self.preview, 'pixmap') or self.preview.pixmap.isNull():
+            return (0, 0)
+            
+        scaled_size = self.preview.pixmap.size().scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio)
+        x_offset = (self.width() - scaled_size.width()) // 2
+        y_offset = (self.height() - scaled_size.height()) // 2
+        
+        img_x = pos.x() - x_offset
+        img_y = pos.y() - y_offset
+        
+        orig_w = self.preview.pixmap.width()
+        orig_h = self.preview.pixmap.height()
+        
+        if scaled_size.width() == 0 or scaled_size.height() == 0:
+            return (0, 0)
+            
+        real_x = int(img_x * orig_w / scaled_size.width())
+        real_y = int(img_y * orig_h / scaled_size.height())
+        
+        real_x = max(0, min(real_x, orig_w - 1))
+        real_y = max(0, min(real_y, orig_h - 1))
+        
+        return (real_x, real_y)
 
 class PreviewWindow(QMainWindow):
     def __init__(self, capture_app, image_cv, save_dir):
@@ -149,6 +196,8 @@ class PreviewWindow(QMainWindow):
         
         scroll_area = QScrollArea()
         scroll_area.setWidget(self.image_label)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(scroll_area)
         
         self.setCentralWidget(self.central_widget)
@@ -161,12 +210,10 @@ class PreviewWindow(QMainWindow):
         self.raise_()
         self.activateWindow()
 
-    def refresh_image(self, temp_cv=None):
-        img_to_show = temp_cv if temp_cv is not None else self.image_cv
-        self.q_image = cv2_to_qimage(img_to_show)
+    def refresh_image(self):
+        self.q_image = cv2_to_qimage(self.image_cv)
         self.pixmap = QPixmap.fromImage(self.q_image)
-        self.image_label.setPixmap(self.pixmap)
-        self.image_label.adjustSize()
+        self.image_label.update()
 
     def create_toolbar(self):
         toolbar = QToolBar("메인 툴바")
