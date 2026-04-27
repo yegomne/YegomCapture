@@ -1,5 +1,5 @@
 {
-  "latest_version": "1.0.8",
+  "latest_version": "2.3",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "연속 캡쳐 시 이전 미리보기 창 잔상이 남는 문제 수정"
+  "release_notes": "고해상도(4K 등) 모니터 및 배율 환경에서 프리뷰 이미지가 잘리거나 여백이 생기는 현상 완벽 수정 (DPI 스케일링 대응 완비)"
 }

@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "1.0.8"
+CURRENT_VERSION = "2.3"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -855,9 +855,26 @@ class CaptureApp(QObject):
         self.preview.copy_to_clipboard_silent()
 
 if __name__ == "__main__":
+    import ctypes
+    import os
+    
+    # 윈도우 DPI 스케일링 문제 해결 (프리뷰 창 잘림 방지)
+    try:
+        # Windows 8.1 이상
+        ctypes.windll.shcore.SetProcessDpiAwareness(2) # PROCESS_PER_MONITOR_DPI_AWARE
+    except Exception:
+        try:
+            # Windows Vista 이상
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+            
+    # PyQt6의 기본 High DPI 스케일링을 비활성화 (물리적 픽셀을 논리적 픽셀과 1:1 매칭)
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "0"
+    os.environ["QT_SCALE_FACTOR"] = "1"
+
     app = QApplication(sys.argv)
     
-    import ctypes
     try:
         myappid = 'mycompany.myproduct.captureapp.1.0'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
