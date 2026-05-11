@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "2.4"
+CURRENT_VERSION = "2.5"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -47,30 +47,71 @@ class HotkeyThread(QThread):
         self.scroll = scroll
         self.folder = folder
         self.cancel = cancel
+        self.running = True
+
+    def parse_hotkey(self, hk_str):
+        mods = 0
+        vk = 0
+        parts = [p.strip().lower() for p in hk_str.split('+')]
+        VK_MAP = {
+            'space': 0x20, 'esc': 0x1B, 'enter': 0x0D, 'tab': 0x09, 'backspace': 0x08,
+            'up': 0x26, 'down': 0x28, 'left': 0x25, 'right': 0x27,
+            'f1': 0x70, 'f2': 0x71, 'f3': 0x72, 'f4': 0x73, 'f5': 0x74, 'f6': 0x75,
+            'f7': 0x76, 'f8': 0x77, 'f9': 0x78, 'f10': 0x79, 'f11': 0x7A, 'f12': 0x7B
+        }
+        for i in range(26): VK_MAP[chr(ord('a') + i)] = 0x41 + i
+        for i in range(10): VK_MAP[str(i)] = 0x30 + i
+        for p in parts:
+            if p in ('ctrl', 'control'): mods |= 0x0002
+            elif p == 'alt': mods |= 0x0001
+            elif p == 'shift': mods |= 0x0004
+            elif p == 'win': mods |= 0x0008
+            else:
+                vk = VK_MAP.get(p, 0)
+                if not vk and len(p) == 1: vk = ord(p.upper())
+        return mods, vk
 
     def run(self):
-        try:
-            keyboard.add_hotkey(self.normal, lambda: self.trigger_capture.emit(False))
-            keyboard.add_hotkey(self.scroll, lambda: self.trigger_capture.emit(True))
-            keyboard.add_hotkey(self.folder, lambda: self.open_folder.emit())
-            keyboard.add_hotkey(self.cancel, lambda: self.cancel_capture.emit())
-            keyboard.wait() 
-        except Exception as e:
-            print(f"Hotkey Error: {e}")
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.windll.user32
+        
+        HOTKEYS = { 1: self.normal, 2: self.scroll, 3: self.folder, 4: self.cancel }
+        registered_ids = []
+        
+        for hid, hk_str in HOTKEYS.items():
+            mods, vk = self.parse_hotkey(hk_str)
+            if vk and user32.RegisterHotKey(None, hid, mods, vk):
+                registered_ids.append(hid)
+
+        msg = wintypes.MSG()
+        while self.running:
+            if user32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 1):
+                if msg.message == 0x0312: # WM_HOTKEY
+                    if msg.wParam == 1: self.trigger_capture.emit(False)
+                    elif msg.wParam == 2: self.trigger_capture.emit(True)
+                    elif msg.wParam == 3: self.open_folder.emit()
+                    elif msg.wParam == 4: self.cancel_capture.emit()
+                user32.TranslateMessage(ctypes.byref(msg))
+                user32.DispatchMessageW(ctypes.byref(msg))
+            else:
+                self.msleep(20)
+                
+        for hid in registered_ids:
+            user32.UnregisterHotKey(None, hid)
+
+    def stop(self):
+        self.running = False
+        self.wait()
 
     def update_hotkeys(self, normal, scroll, folder, cancel='esc'):
-        try:
-            keyboard.unhook_all_hotkeys()
-            self.normal = normal
-            self.scroll = scroll
-            self.folder = folder
-            self.cancel = cancel
-            keyboard.add_hotkey(self.normal, lambda: self.trigger_capture.emit(False))
-            keyboard.add_hotkey(self.scroll, lambda: self.trigger_capture.emit(True))
-            keyboard.add_hotkey(self.folder, lambda: self.open_folder.emit())
-            keyboard.add_hotkey(self.cancel, lambda: self.cancel_capture.emit())
-        except Exception as e:
-            print(f"Update Hotkey Error: {e}")
+        self.stop()
+        self.normal = normal
+        self.scroll = scroll
+        self.folder = folder
+        self.cancel = cancel
+        self.running = True
+        self.start()
 
 class UpdateCheckerThread(QThread):
     update_found = pyqtSignal(str, str, str) # version, url, notes
