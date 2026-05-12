@@ -1,11 +1,11 @@
 [Setup]
 AppName=예곰 캡쳐 프로그램
-AppVersion=2.5
+AppVersion=2.6
 AppPublisher=Yegom Inc.
 DefaultDirName={pf}\YegomCapture
 DefaultGroupName=예곰 캡쳐
 OutputDir=.\Inno_Output
-OutputBaseFilename=YegomCapture_Setup_v2.5
+OutputBaseFilename=YegomCapture_Setup_v2.6
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin

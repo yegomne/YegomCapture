@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "2.5"
+CURRENT_VERSION = "2.6"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -253,6 +253,7 @@ class PreviewWindow(QMainWindow):
 
     def refresh_image(self):
         self.q_image = cv2_to_qimage(self.image_cv)
+        self.q_image.setDevicePixelRatio(self.devicePixelRatioF())
         self.pixmap = QPixmap.fromImage(self.q_image)
         self.image_label.update()
 
@@ -316,6 +317,7 @@ class OverlayWidget(QWidget):
         self.setFocus()
         
         self.q_image = cv2_to_qimage(self.screen_image_cv)
+        self.q_image.setDevicePixelRatio(self.devicePixelRatioF())
         self.pixmap = QPixmap.fromImage(self.q_image)
         
         self.begin = QPoint()
