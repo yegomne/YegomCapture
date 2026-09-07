@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "2.6"
+CURRENT_VERSION = "2.7"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -35,6 +35,14 @@ def cv2_to_qimage(cv_img):
     bytes_per_line = channel * width
     q_img = QImage(img_rgb.tobytes(), width, height, bytes_per_line, QImage.Format.Format_RGB888)
     return q_img 
+
+def qpixmap_to_cv2(pixmap):
+    qimg = pixmap.toImage().convertToFormat(QImage.Format.Format_BGR888)
+    width = qimg.width()
+    height = qimg.height()
+    ptr = qimg.bits()
+    ptr.setsize(height * width * 3)
+    return np.array(ptr, copy=True).reshape((height, width, 3))
 
 class HotkeyThread(QThread):
     trigger_capture = pyqtSignal(bool)
@@ -143,16 +151,24 @@ class DrawableLabel(QLabel):
         self.end_point = QPoint()
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    def paintEvent(self, event):
+    def get_displayed_pixmap(self):
         if not hasattr(self.preview, 'pixmap') or self.preview.pixmap.isNull():
+            return None
+        pix = self.preview.pixmap
+        # 원본보다 창 크기가 작을 때만 비율을 유지하며 축소, 원본보다 창이 크면 1:1 원본 크기(100%) 유지
+        if pix.width() > self.width() or pix.height() > self.height():
+            return pix.scaled(
+                self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+            )
+        return pix
+
+    def paintEvent(self, event):
+        scaled_pixmap = self.get_displayed_pixmap()
+        if scaled_pixmap is None:
             return
             
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
-        
-        scaled_pixmap = self.preview.pixmap.scaled(
-            self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
-        )
         
         x_offset = (self.width() - scaled_pixmap.width()) // 2
         y_offset = (self.height() - scaled_pixmap.height()) // 2
@@ -161,7 +177,8 @@ class DrawableLabel(QLabel):
         
         if self.drawing:
             rect = QRect(self.start_point, self.end_point).normalized()
-            scale_ratio = scaled_pixmap.width() / self.preview.pixmap.width()
+            orig_w = self.preview.image_cv.shape[1]
+            scale_ratio = scaled_pixmap.width() / max(1, orig_w)
             thickness = max(1, int(3 * scale_ratio))
             pen = QPen(QColor(255, 0, 0), thickness, Qt.PenStyle.SolidLine)
             painter.setPen(pen)
@@ -197,24 +214,24 @@ class DrawableLabel(QLabel):
         self.preview.copy_to_clipboard_silent()
 
     def map_to_image(self, pos):
-        if not hasattr(self.preview, 'pixmap') or self.preview.pixmap.isNull():
+        scaled_pixmap = self.get_displayed_pixmap()
+        if scaled_pixmap is None:
             return (0, 0)
             
-        scaled_size = self.preview.pixmap.size().scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio)
-        x_offset = (self.width() - scaled_size.width()) // 2
-        y_offset = (self.height() - scaled_size.height()) // 2
+        x_offset = (self.width() - scaled_pixmap.width()) // 2
+        y_offset = (self.height() - scaled_pixmap.height()) // 2
         
         img_x = pos.x() - x_offset
         img_y = pos.y() - y_offset
         
-        orig_w = self.preview.pixmap.width()
-        orig_h = self.preview.pixmap.height()
+        orig_w = self.preview.image_cv.shape[1]
+        orig_h = self.preview.image_cv.shape[0]
         
-        if scaled_size.width() == 0 or scaled_size.height() == 0:
+        if scaled_pixmap.width() == 0 or scaled_pixmap.height() == 0:
             return (0, 0)
             
-        real_x = int(img_x * orig_w / scaled_size.width())
-        real_y = int(img_y * orig_h / scaled_size.height())
+        real_x = int(img_x * orig_w / scaled_pixmap.width())
+        real_y = int(img_y * orig_h / scaled_pixmap.height())
         
         real_x = max(0, min(real_x, orig_w - 1))
         real_y = max(0, min(real_y, orig_h - 1))
@@ -253,7 +270,6 @@ class PreviewWindow(QMainWindow):
 
     def refresh_image(self):
         self.q_image = cv2_to_qimage(self.image_cv)
-        self.q_image.setDevicePixelRatio(self.devicePixelRatioF())
         self.pixmap = QPixmap.fromImage(self.q_image)
         self.image_label.update()
 
@@ -303,22 +319,20 @@ class PreviewWindow(QMainWindow):
         clipboard.setPixmap(self.pixmap)
 
 class OverlayWidget(QWidget):
-    capture_complete = pyqtSignal(object, QRect, bool)
+    capture_complete = pyqtSignal(object, QRect, QRect, bool, float) # cropped_cv, local_rect, global_rect, is_scroll, dpr
+    closed_signal = pyqtSignal()
 
-    def __init__(self, screen_image_cv, geometry, is_scroll=False):
-        super().__init__()
-        self.screen_image_cv = screen_image_cv
+    def __init__(self, screen, pixmap, is_scroll=False, parent=None):
+        super().__init__(parent)
+        self.screen_obj = screen
+        self.pixmap = pixmap
         self.is_scroll = is_scroll
-        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground) # Removed due to Windows Qt bugs on multi-monitor
+        
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
-        self.setGeometry(geometry)
+        self.setGeometry(screen.geometry())
         self.setCursor(Qt.CursorShape.CrossCursor)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFocus()
-        
-        self.q_image = cv2_to_qimage(self.screen_image_cv)
-        self.q_image.setDevicePixelRatio(self.devicePixelRatioF())
-        self.pixmap = QPixmap.fromImage(self.q_image)
         
         self.begin = QPoint()
         self.end = QPoint()
@@ -357,7 +371,7 @@ class OverlayWidget(QWidget):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
-            self.close()
+            self.closed_signal.emit()
             return
         super().keyPressEvent(event)
 
@@ -379,21 +393,24 @@ class OverlayWidget(QWidget):
             self.is_drawing = False
             rect = QRect(self.begin, self.end).normalized()
             
-            if rect.width() > 0 and rect.height() > 0:
-                x, y, w, h = rect.x(), rect.y(), rect.width(), rect.height()
-                cropped = self.screen_image_cv[y:y+h, x:x+w]
-                self.capture_complete.emit(cropped, rect, self.is_scroll)
-            self.close()
+            if rect.width() > 5 and rect.height() > 5:
+                sg = self.screen_obj.geometry()
+                global_rect = QRect(sg.x() + rect.x(), sg.y() + rect.y(), rect.width(), rect.height())
+                cropped_pixmap = self.pixmap.copy(rect)
+                cropped_cv = qpixmap_to_cv2(cropped_pixmap)
+                dpr = self.screen_obj.devicePixelRatio()
+                self.capture_complete.emit(cropped_cv, rect, global_rect, self.is_scroll, dpr)
+            else:
+                self.closed_signal.emit()
 
 class ScrollCaptureWorker(QThread):
     finished = pyqtSignal(object)
     
-    def __init__(self, start_img, rect, offset_x=0, offset_y=0):
+    def __init__(self, start_img, global_rect, dpr=1.0):
         super().__init__()
         self.start_img = start_img
-        self.rect = rect
-        self.offset_x = offset_x
-        self.offset_y = offset_y
+        self.global_rect = global_rect
+        self.dpr = dpr
         self.running = True
         
     def run(self):
@@ -404,14 +421,20 @@ class ScrollCaptureWorker(QThread):
         self.last_chunk = self.start_img.copy()
         stitched_img = self.start_img.copy()
         
-        h = self.rect.height()
+        h = self.global_rect.height()
         # 스크롤 양을 안정적으로 줄입니다.
         arrows = max(1, int(h * 0.3 / 100))
 
         time.sleep(0.5) 
         
-        cx = self.rect.x() + self.rect.width() // 2 + self.offset_x
-        cy = self.rect.y() + self.rect.height() // 2 + self.offset_y
+        # 물리 픽셀 좌표 계산 (mss 및 SetCursorPos용)
+        phys_x = int(round(self.global_rect.x() * self.dpr))
+        phys_y = int(round(self.global_rect.y() * self.dpr))
+        phys_w = self.start_img.shape[1]
+        phys_h = self.start_img.shape[0]
+
+        cx = phys_x + phys_w // 2
+        cy = phys_y + phys_h // 2
         ctypes.windll.user32.SetCursorPos(int(cx), int(cy))
         
         for i in range(250):
@@ -428,13 +451,9 @@ class ScrollCaptureWorker(QThread):
             
             time.sleep(0.4) 
             with mss.mss() as sct:
-                monitor = sct.monitors[0]
-                sct_img = sct.grab(monitor)
+                sct_img = sct.grab({"left": phys_x, "top": phys_y, "width": phys_w, "height": phys_h})
                 img_np = np.array(sct_img)
-                img_cv = cv2.cvtColor(img_np, cv2.COLOR_BGRA2BGR)
-                
-            x, y, w, h = self.rect.x(), self.rect.y(), self.rect.width(), self.rect.height()
-            new_chunk = img_cv[y:y+h, x:x+w]
+                new_chunk = cv2.cvtColor(img_np, cv2.COLOR_BGRA2BGR)
             
             gray1 = cv2.cvtColor(self.last_chunk, cv2.COLOR_BGR2GRAY)
             gray2 = cv2.cvtColor(new_chunk, cv2.COLOR_BGR2GRAY)
@@ -470,6 +489,7 @@ class ScrollCaptureWorker(QThread):
                     break
         
         self.finished.emit(stitched_img)
+
 
 
 class SettingsDialog(QDialog):
@@ -629,7 +649,7 @@ class CaptureApp(QObject):
             
         self.apply_theme()
         self.setup_tray()
-        self.overlay = None
+        self.overlays = []
         self.preview = None
         self.scroll_worker = None
         
@@ -681,10 +701,18 @@ class CaptureApp(QObject):
             webbrowser.open(url)
 
     def _cancel_capture(self):
-        if self.overlay:
-            self.overlay.close()
+        self._close_all_overlays()
         if self.scroll_worker and self.scroll_worker.running:
             self.scroll_worker.running = False
+
+    def _close_all_overlays(self):
+        if hasattr(self, 'overlays') and self.overlays:
+            for ov in self.overlays:
+                try:
+                    ov.close()
+                except Exception:
+                    pass
+            self.overlays.clear()
 
     def _open_save_folder(self):
         if os.path.exists(self.save_dir):
@@ -894,7 +922,7 @@ class CaptureApp(QObject):
         self._start_capture(is_scroll)
 
     def _start_capture(self, is_scroll):
-        if hasattr(self, 'overlay') and self.overlay and self.overlay.isVisible():
+        if hasattr(self, 'overlays') and self.overlays:
             return
 
         if hasattr(self, 'scroll_worker') and self.scroll_worker and self.scroll_worker.running:
@@ -905,27 +933,23 @@ class CaptureApp(QObject):
             self.app.processEvents()
             time.sleep(0.2)
 
-        with mss.mss() as sct:
-            monitor = sct.monitors[0]
-            sct_img = sct.grab(monitor)
-            img_np = np.array(sct_img)
-            img_cv = cv2.cvtColor(img_np, cv2.COLOR_BGRA2BGR)
-            
-        geometry = QRect(monitor["left"], monitor["top"], monitor["width"], monitor["height"])
-        
-        self.overlay = OverlayWidget(img_cv, geometry, is_scroll)
-        self.overlay.capture_complete.connect(self.process_capture)
-        self.overlay.show()
+        self.overlays = []
+        for screen in self.app.screens():
+            pixmap = screen.grabWindow(0)
+            overlay = OverlayWidget(screen, pixmap, is_scroll)
+            overlay.capture_complete.connect(self.process_capture)
+            overlay.closed_signal.connect(self._close_all_overlays)
+            self.overlays.append(overlay)
+            overlay.show()
+            overlay.raise_()
+            overlay.activateWindow()
 
-    def process_capture(self, cropped_img_cv, rect, is_scroll):
+    def process_capture(self, cropped_img_cv, rect, global_rect, is_scroll, dpr=1.0):
+        self._close_all_overlays()
         if not is_scroll:
             self.show_preview(cropped_img_cv)
         else:
-            # 트레이 메시지로 인한 포커스 상실 및 캡쳐 화면 왜곡 방지를 위해 주석 처리
-            # self.tray_icon.showMessage("스크롤 캡쳐 진행 중", "키보드 조작을 멈춰주세요...", QSystemTrayIcon.MessageIcon.Information, 2000)
-            offset_x = self.overlay.geometry().x()
-            offset_y = self.overlay.geometry().y()
-            self.scroll_worker = ScrollCaptureWorker(cropped_img_cv, rect, offset_x, offset_y)
+            self.scroll_worker = ScrollCaptureWorker(cropped_img_cv, global_rect, dpr)
             self.scroll_worker.finished.connect(self.show_preview)
             self.scroll_worker.start()
 

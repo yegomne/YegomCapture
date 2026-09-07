@@ -4,6 +4,23 @@ import re
 import json
 import subprocess
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
+# GitHub CLI 인증 토큰 자동 연동 (Git Credential Manager 활용)
+if 'GH_TOKEN' not in os.environ:
+    try:
+        p = subprocess.Popen(['git', 'credential', 'fill'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        out, _ = p.communicate('protocol=https\nhost=github.com\n\n')
+        for line in out.splitlines():
+            if line.startswith('password='):
+                os.environ['GH_TOKEN'] = line.split('=', 1)[1]
+                break
+    except Exception:
+        pass
+
 def run(cmd):
     print(f"🚀 실행 중: {cmd}")
     res = subprocess.run(cmd, shell=True)
