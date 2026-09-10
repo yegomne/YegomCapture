@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "2.8"
+CURRENT_VERSION = "2.9"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -30,19 +30,20 @@ def resource_path(relative_path):
 
 
 def cv2_to_qimage(cv_img):
-    img_rgb = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-    height, width, channel = img_rgb.shape
-    bytes_per_line = channel * width
-    q_img = QImage(img_rgb.tobytes(), width, height, bytes_per_line, QImage.Format.Format_RGB888)
+    img_rgba = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGBA)
+    height, width, _ = img_rgba.shape
+    bytes_per_line = width * 4
+    q_img = QImage(img_rgba.tobytes(), width, height, bytes_per_line, QImage.Format.Format_RGBA8888)
     return q_img 
 
 def qpixmap_to_cv2(pixmap):
-    qimg = pixmap.toImage().convertToFormat(QImage.Format.Format_BGR888)
+    qimg = pixmap.toImage().convertToFormat(QImage.Format.Format_RGBA8888)
     width = qimg.width()
     height = qimg.height()
     ptr = qimg.bits()
-    ptr.setsize(height * width * 3)
-    return np.array(ptr, copy=True).reshape((height, width, 3))
+    ptr.setsize(height * width * 4)
+    arr = np.array(ptr, copy=True).reshape((height, width, 4))
+    return cv2.cvtColor(arr, cv2.COLOR_RGBA2BGR)
 
 class HotkeyThread(QThread):
     trigger_capture = pyqtSignal(bool)
