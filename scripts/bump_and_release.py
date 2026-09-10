@@ -74,6 +74,8 @@ for html_file in ['index.html', '랜딩페이지V1.html']:
     with open(html_file, 'r', encoding='utf-8') as f:
         content = f.read()
     # 정규식을 이용한 다운로드 링크 및 텍스트 자동 치환
+    content = re.sub(r'/releases/download/v[\d\.]+/YegomCapture_Setup_v[\d\.]+\.exe', f'/releases/download/v{new_version}/YegomCapture_Setup_v{new_version}.exe', content)
+    content = re.sub(r'/releases/latest/download/YegomCapture_Setup_v[\d\.]+\.exe', f'/releases/download/v{new_version}/YegomCapture_Setup_v{new_version}.exe', content)
     content = re.sub(r'YegomCapture_Setup_v[\d\.]+\.exe', f'YegomCapture_Setup_v{new_version}.exe', content)
     content = re.sub(r'YegomneCapture [\d\.]+ 정식', f'YegomneCapture {new_version} 정식', content)
     content = re.sub(r'V[\d\.]+ 업데이트 -', f'V{new_version} 업데이트 -', content)
@@ -93,8 +95,9 @@ if not os.path.exists(iscc_path):
 run(f'"{iscc_path}" Setup_Script.iss')
 
 print("\n🌐 [STEP 4] GitHub Releases 배포 및 Repository 푸시 시작...")
-# 자동배포공장.bat과 동일하게 동작
-run(f'gh release create "v{new_version}" "Inno_Output\\YegomCapture_Setup_v{new_version}.exe" -t "YegomCapture v{new_version} 릴리즈" -n "{release_notes}"')
+import shutil
+shutil.copyfile(f"Inno_Output\\YegomCapture_Setup_v{new_version}.exe", "Inno_Output\\YegomCapture_Setup.exe")
+run(f'gh release create "v{new_version}" "Inno_Output\\YegomCapture_Setup_v{new_version}.exe" "Inno_Output\\YegomCapture_Setup.exe" -t "YegomCapture v{new_version} 릴리즈" -n "{release_notes}"')
 
 run('git add .')
 run(f'git commit -m "chore: release v{new_version}"')
