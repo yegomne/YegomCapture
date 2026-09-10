@@ -13,6 +13,8 @@ LicenseFile=eula.txt
 InfoBeforeFile=info.txt
 ; 3. 설치 폴더 선택 화면 보이기
 DisableDirPage=no
+CloseApplications=force
+RestartApplications=no
 
 [Files]
 ; (주의) pyinstaller로 단일 파일 빌드된 CaptureApp.exe 가 dist 풀더 안에 있어야 합니다!
@@ -26,3 +28,26 @@ Name: "{autodesktop}\간편 캡쳐 프로그램"; Filename: "{app}\CaptureApp.ex
 
 [Tasks]
 Name: "desktopicon"; Description: "바탕 화면에 캡쳐 프로그램 바로가기 만들기"; GroupDescription: "추가 옵션:"
+
+[Code]
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ResultCode: Integer;
+begin
+  Exec('taskkill.exe', '/f /im main.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/f /im CaptureApp.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Sleep(500);
+  Result := '';
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  ResultCode: Integer;
+begin
+  if CurUninstallStep = usUninstall then
+  begin
+    Exec('taskkill.exe', '/f /im main.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('taskkill.exe', '/f /im CaptureApp.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(500);
+  end;
+end;

@@ -10,7 +10,7 @@ import subprocess
 import urllib.request
 import webbrowser
 
-CURRENT_VERSION = "2.7"
+CURRENT_VERSION = "2.8"
 
 from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
                              QMainWindow, QLabel, QFileDialog, QToolBar, QWidget, 
@@ -971,6 +971,14 @@ class CaptureApp(QObject):
 if __name__ == "__main__":
     import ctypes
     import os
+    
+    # 중복 실행 방지 (Windows Named Mutex)
+    MUTEX_NAME = "YegomCapture_SingleInstance_Mutex"
+    mutex = ctypes.windll.kernel32.CreateMutexW(None, False, MUTEX_NAME)
+    if ctypes.windll.kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
+        temp_app = QApplication(sys.argv)
+        QMessageBox.information(None, "예곰 캡쳐", "예곰 캡쳐 프로그램이 이미 실행 중입니다.\n화면 우측 하단 시스템 트레이 아이콘을 확인해주세요.")
+        sys.exit(0)
     
     # 윈도우 DPI 스케일링 문제 해결 (프리뷰 창 잘림 방지)
     try:

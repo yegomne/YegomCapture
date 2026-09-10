@@ -82,7 +82,7 @@ for html_file in ['index.html', '랜딩페이지V1.html']:
 
 print("✅ 파일 업데이트 완료!\n")
 print(f"🏗️ [STEP 2] PyInstaller를 통한 {new_version} 빌드 시작...")
-run('python -m PyInstaller -w -F --uac-admin --icon=icon.ico --add-data "icon.ico;." --add-data "icon.png;." main.py')
+run('python -m PyInstaller -w -F -n YegomCapture --uac-admin --icon=icon.ico --add-data "icon.ico;." --add-data "icon.png;." main.py')
 
 print("\n🏗️ [STEP 3] Inno Setup을 통한 설치 파일(exe) 패키징 시작...")
 iscc_path = r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe"

@@ -1,5 +1,5 @@
 {
-  "latest_version": "2.7",
+  "latest_version": "2.8",
   "download_url": "https://capture.yegomne.com",
-  "release_notes": "멀티모니터 해상도/배율 차이로 인한 화면 확대 왜곡 해결 및 1:1 원본 비율 보존"
+  "release_notes": "실행 파일명 YegomCapture.exe 고유화, 설치 시 안전 종료 및 중복 실행 방지(Mutex) 적용"
 }
